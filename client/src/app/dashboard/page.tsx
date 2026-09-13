@@ -1,8 +1,45 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Clock, BookOpen, Target, Brain } from "lucide-react"
+import { Clock, BookOpen, Target, Brain, AlertCircle } from "lucide-react"
+import Link from "next/link";
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<{
+    totalMinutes?: number;
+    totalConversations?: number;
+    totalMessages?: number;
+    avgConfidence?: number;
+    streak?: number;
+    level?: string;
+    recentMistakes?: Array<{
+      id: string;
+      wrong: string;
+      right: string;
+      why: string;
+      occurrences: number;
+    }>;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/progress")
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load progress:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="p-8 text-center animate-pulse">Loading dashboard...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -17,30 +54,30 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12h 30m</div>
-            <p className="text-xs text-muted-foreground">+2h from last week</p>
+            <div className="text-2xl font-bold">{Math.round(data?.totalMinutes || 0)}m</div>
+            <p className="text-xs text-muted-foreground">Keep talking to improve!</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vocabulary Learned</CardTitle>
+            <CardTitle className="text-sm font-medium">Conversations</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">342</div>
-            <p className="text-xs text-muted-foreground">+24 new words</p>
+            <div className="text-2xl font-bold">{data?.totalConversations || 0}</div>
+            <p className="text-xs text-muted-foreground">{data?.totalMessages || 0} total messages</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Grammar Score</CardTitle>
+            <CardTitle className="text-sm font-medium">Avg Confidence</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">85%</div>
-            <p className="text-xs text-muted-foreground">+5% improvement</p>
+            <div className="text-2xl font-bold">{data?.avgConfidence || 0}%</div>
+            <p className="text-xs text-muted-foreground">Based on AI evaluation</p>
           </CardContent>
         </Card>
 
@@ -50,8 +87,8 @@ export default function DashboardPage() {
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">7 Days</div>
-            <p className="text-xs text-muted-foreground">Keep it up!</p>
+            <div className="text-2xl font-bold">{data?.streak || 0} Days</div>
+            <p className="text-xs text-muted-foreground">Current Level: {data?.level || 'A1'}</p>
           </CardContent>
         </Card>
       </div>
@@ -59,21 +96,25 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Your latest practice sessions and conversations.</CardDescription>
+            <CardTitle>Recent Mistakes to Review</CardTitle>
+            <CardDescription>Common grammar issues you should watch out for.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Placeholder activity items */}
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center">
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Job Interview Practice</p>
-                    <p className="text-sm text-muted-foreground">15 mins • Grammar Score: 88%</p>
+              {data?.recentMistakes && data.recentMistakes.length > 0 ? (
+                 data.recentMistakes.map((mistake) => (
+                  <div key={mistake.id} className="flex flex-col space-y-1 bg-muted/50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-500" />
+                      <span className="text-sm font-medium line-through text-muted-foreground">{mistake.wrong}</span>
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">→ {mistake.right}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground pl-6">{mistake.why} (Seen {mistake.occurrences} times)</p>
                   </div>
-                  <div className="ml-auto font-medium">Today</div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground italic p-4 text-center">No mistakes recorded yet. Keep practicing!</div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -83,9 +124,28 @@ export default function DashboardPage() {
             <CardTitle>Daily Goal</CardTitle>
             <CardDescription>Speak for 30 minutes today</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Progress value={60} className="h-2" />
-            <p className="text-sm text-muted-foreground text-center">18 / 30 minutes completed</p>
+          <CardContent className="space-y-4 flex flex-col items-center justify-center pt-8">
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-muted/30" />
+                <circle 
+                  cx="64" cy="64" r="60" 
+                  stroke="currentColor" 
+                  strokeWidth="8" 
+                  fill="transparent" 
+                  strokeDasharray={`${Math.min((data?.totalMinutes || 0) / 30 * 377, 377)} 377`}
+                  className="text-primary transition-all duration-1000 ease-out" 
+                />
+              </svg>
+              <div className="absolute flex flex-col items-center">
+                <span className="text-3xl font-bold">{Math.round(data?.totalMinutes || 0)}</span>
+                <span className="text-xs text-muted-foreground">/ 30 min</span>
+              </div>
+            </div>
+            
+            <Link href="/practice" className="mt-6 w-full inline-flex justify-center items-center px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium">
+              Continue Practice
+            </Link>
           </CardContent>
         </Card>
       </div>
