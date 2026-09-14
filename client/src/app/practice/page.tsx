@@ -1,40 +1,19 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { buttonVariants } from "@/components/ui/button"
-import { Briefcase, Coffee, Plane, Utensils, MessageSquare } from "lucide-react"
+import { MessageCircle, Briefcase, UtensilsCrossed, Plane, Building2, GraduationCap, ShoppingBag, Swords } from "lucide-react"
 import Link from "next/link"
+import { PRACTICE_MODES } from "@/constants/practice-modes"
 
-const practiceModes = [
-  {
-    title: "Job Interview",
-    description: "Practice answering common interview questions.",
-    icon: Briefcase,
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-  },
-  {
-    title: "Restaurant",
-    description: "Order food and handle restaurant conversations.",
-    icon: Utensils,
-    color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-  },
-  {
-    title: "Airport",
-    description: "Navigate check-in, security, and boarding.",
-    icon: Plane,
-    color: "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300"
-  },
-  {
-    title: "Casual Chat",
-    description: "Talk with a friend about hobbies and daily life.",
-    icon: Coffee,
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
-  },
-  {
-    title: "Customer Support",
-    description: "Resolve an issue over the phone.",
-    icon: MessageSquare,
-    color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-  }
-]
+const iconMap: Record<string, React.ElementType> = {
+  MessageCircle,
+  Briefcase,
+  UtensilsCrossed,
+  Plane,
+  Building2,
+  GraduationCap,
+  ShoppingBag,
+  Swords,
+};
 
 export default function PracticePage() {
   return (
@@ -45,22 +24,25 @@ export default function PracticePage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {practiceModes.map((mode) => (
-          <Card key={mode.title} className="hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full">
-            <CardHeader>
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${mode.color}`}>
-                <mode.icon className="w-6 h-6" />
-              </div>
-              <CardTitle>{mode.title}</CardTitle>
-              <CardDescription>{mode.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-              <Link href={`/voice?mode=${mode.title.toLowerCase().replace(' ', '-')}`} className={buttonVariants({ variant: "outline", className: "w-full" })}>
-                Start Practice
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+        {PRACTICE_MODES.map((mode) => {
+          const Icon = iconMap[mode.icon] || MessageCircle;
+          return (
+            <Card key={mode.slug} className="hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full group">
+              <CardHeader>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${mode.color} transition-transform group-hover:scale-110`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+                <CardTitle>{mode.title}</CardTitle>
+                <CardDescription>{mode.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <Link href={`/voice?mode=${mode.slug}`} className={buttonVariants({ variant: "outline", className: "w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors" })}>
+                  Start Practice
+                </Link>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   )
