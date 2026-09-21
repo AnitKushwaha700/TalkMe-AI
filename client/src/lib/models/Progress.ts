@@ -1,28 +1,33 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
+import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface IProgress extends Document {
-  userId: mongoose.Types.ObjectId;
-  date: Date;
-  minutesSpoken: number;
-  newVocabulary: string[];
-  averageGrammarScore: number;
+  sessionId: string;
+  date: string; // YYYY-MM-DD
+  minutes: number;
+  messages: number;
+  grammarScore: number;
+  newWords: number;
+  streakMaintained: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const ProgressSchema: Schema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    date: { type: Date, required: true, default: Date.now },
-    minutesSpoken: { type: Number, default: 0 },
-    newVocabulary: [{ type: String }],
-    averageGrammarScore: { type: Number, default: 100 },
+    sessionId: { type: String, required: true, index: true },
+    date: { type: String, required: true }, // YYYY-MM-DD
+    minutes: { type: Number, default: 0 },
+    messages: { type: Number, default: 0 },
+    grammarScore: { type: Number, default: 0 },
+    newWords: { type: Number, default: 0 },
+    streakMaintained: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-// Ensure only one progress record per user per day
-ProgressSchema.index({ userId: 1, date: 1 }, { unique: true });
+// One progress record per user per day
+ProgressSchema.index({ sessionId: 1, date: 1 }, { unique: true });
 
-export const Progress: Model<IProgress> = 
-  mongoose.models.Progress || mongoose.model<IProgress>('Progress', ProgressSchema);
+export const Progress: Model<IProgress> =
+  mongoose.models.Progress ||
+  mongoose.model<IProgress>("Progress", ProgressSchema);

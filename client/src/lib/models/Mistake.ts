@@ -1,26 +1,37 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
+import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface IMistake extends Document {
-  userId: mongoose.Types.ObjectId;
-  conversationId: mongoose.Types.ObjectId;
-  wrongText: string;
-  correctedText: string;
-  explanation: string;
-  category: string; // e.g., 'grammar', 'vocabulary', 'pronunciation'
+  sessionId: string;
+  type: "grammar" | "vocabulary" | "pronunciation";
+  wrong: string;
+  right: string;
+  why: string;
+  occurrences: number;
+  lastSeen: Date;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const MistakeSchema: Schema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
-    wrongText: { type: String, required: true },
-    correctedText: { type: String, required: true },
-    explanation: { type: String, required: true },
-    category: { type: String, default: 'grammar' },
+    sessionId: { type: String, required: true, index: true },
+    type: {
+      type: String,
+      enum: ["grammar", "vocabulary", "pronunciation"],
+      default: "grammar",
+    },
+    wrong: { type: String, required: true },
+    right: { type: String, required: true },
+    why: { type: String, required: true },
+    occurrences: { type: Number, default: 1 },
+    lastSeen: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
 
-export const Mistake: Model<IMistake> = 
-  mongoose.models.Mistake || mongoose.model<IMistake>('Mistake', MistakeSchema);
+// Compound index for deduplication
+MistakeSchema.index({ sessionId: 1, wrong: 1, right: 1 }, { unique: true });
+
+export const Mistake: Model<IMistake> =
+  mongoose.models.Mistake ||
+  mongoose.model<IMistake>("Mistake", MistakeSchema);

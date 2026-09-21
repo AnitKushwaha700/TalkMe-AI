@@ -7,7 +7,10 @@ import {
   Settings,
   User,
   LayoutDashboard,
-  GraduationCap
+  GraduationCap,
+  History,
+  BookOpen,
+  Lightbulb,
 } from "lucide-react"
 import {
   Sidebar,
@@ -48,6 +51,26 @@ const data = {
           title: "Voice Assistant",
           url: "/voice",
           icon: Mic,
+        },
+      ],
+    },
+    {
+      title: "Review",
+      items: [
+        {
+          title: "History",
+          url: "/history",
+          icon: History,
+        },
+        {
+          title: "Grammar",
+          url: "/grammar",
+          icon: BookOpen,
+        },
+        {
+          title: "Vocabulary",
+          url: "/vocabulary",
+          icon: Lightbulb,
         },
       ],
     },

@@ -1,0 +1,49 @@
+{
+  "name": "TalkMe AI",
+  "short_name": "TalkMe",
+  "description": "Free AI-powered English communication coach. Practice speaking English with real-time feedback on grammar, vocabulary, and pronunciation.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#6366F1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Start Practice",
+      "url": "/practice",
+      "description": "Choose a practice mode and start speaking"
+    },
+    {
+      "name": "Voice Chat",
+      "url": "/voice?mode=free-talk",
+      "description": "Jump into a free conversation"
+    },
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your learning progress"
+    }
+  ]
+}
